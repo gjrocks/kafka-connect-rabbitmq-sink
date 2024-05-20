@@ -13,4 +13,5 @@
  # See the License for the specific language governing permissions and
  # limitations under the License.
 
-org.apache.kafka.connect.file.FileStreamSinkConnector
+
+com.gj.rabbitmq.connectors.sink.RabbitMQSinkConnector

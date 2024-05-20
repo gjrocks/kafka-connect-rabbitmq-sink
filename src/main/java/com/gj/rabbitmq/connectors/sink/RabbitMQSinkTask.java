@@ -34,12 +34,26 @@ public class RabbitMQSinkTask extends SinkTask {
     public void put(Collection<SinkRecord> sinkRecords) {
         for (SinkRecord record : sinkRecords) {
             log.trace("current sinkRecord value: " + record.value());
+            System.out.println("current sinkRecord value: " + record.value());
+            System.out.println("current sinkRecord value type: " + record.value().getClass().getName());
+            byte[] payload=null;
             if (!(record.value() instanceof byte[])) {
-                throw new ConnectException("the value of the record has an invalid type (must be of type byte[])");
+                //throw new ConnectException("the value of the record has an invalid type (must be of type byte[]) it is of type " + record.value().getClass().getName());
+                if(record.value() instanceof java.util.HashMap){
+                    java.util.HashMap mp=(java.util.HashMap)record.value();
+                    payload=org.apache.commons.lang3.SerializationUtils.serialize(mp);
+                }
+
+
+            }else{
+                System.out.println("I got my bytes");
+                payload=(byte[]) record.value();
             }
+
+
             try {
                 channel.basicPublish(this.config.exchange, this.config.routingKey,
-                        RabbitMQSinkHeaderParser.parse(config.getString(HEADER_CONF)), (byte[]) record.value());
+                        RabbitMQSinkHeaderParser.parse(config.getString(HEADER_CONF)), payload);
             } catch (IOException e) {
                 log.error("There was an error while publishing the outgoing message to RabbitMQ");
                 throw new RetriableException(e);
